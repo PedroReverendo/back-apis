@@ -1,22 +1,24 @@
+// models/user.js
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const favoriteSchema = new mongoose.Schema({
-  movie_id: Number,
+const favoriteSchema = new Schema({
+  movieId: Number,
   title: String,
-  poster_path: String,
-  added_at: {
+  posterPath: String,
+  addedAt: {
     type: Date,
     default: Date.now,
   },
-});
+}, { _id: true });
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   username: { type: String, required: true, unique: true },
   email:    { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // en producción debe estar hasheada
-  fecha_registro: { type: Number, default: () => Math.floor(Date.now() / 1000) },
-  ultimo_acceso:  { type: Number, default: () => Math.floor(Date.now() / 1000) },
+  password: { type: String, required: true },
+  fechaRegistro: { type: Date, default: Date.now },
+  ultimoAcceso:  { type: Date, default: Date.now },
   favorites: [favoriteSchema],
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

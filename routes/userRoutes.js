@@ -64,55 +64,46 @@ router.get('/me', auth, async (req, res) => {
 // POST /api/users/favorites - Agregar una película favorita
 router.post('/favorites', auth, async (req, res) => {
   try {
-    const { movie_id, title, poster_path } = req.body;
+    const { movieId, title, posterPath } = req.body;
 
-    if (!movie_id || !title || !poster_path) {
+    if (!movieId || !title || !posterPath)
       return res.status(400).json({ error: 'Faltan datos de la película' });
-    }
 
     const user = await User.findById(req.userId);
 
-    // Verificar si ya está agregada
-    const exists = user.favorites.some(fav => fav.movie_id === movie_id);
-    if (exists) {
+    const exists = user.favorites.some(fav => fav.movieId === movieId);
+    if (exists)
       return res.status(409).json({ error: 'La película ya está en favoritos' });
-    }
 
-    user.favorites.push({
-      movie_id,
-      title,
-      poster_path,
-      added_at: new Date(),
-    });
-
+    user.favorites.push({ movieId, title, posterPath });
     await user.save();
-    res.status(200).json({ message: 'Película agregada a favoritos', favorites: user.favorites });
+
+    res.status(200).json({ message: 'Película agregada', favorites: user.favorites });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error al agregar la película' });
+    res.status(500).json({ error: 'Error al agregar película a favoritos' });
   }
 });
+
 
 
 // DELETE /api/users/favorites/:movieId - Eliminar una película favorita
 router.delete('/favorites/:movieId', auth, async (req, res) => {
   try {
     const movieId = parseInt(req.params.movieId);
-
     const user = await User.findById(req.userId);
+
     const originalLength = user.favorites.length;
+    user.favorites = user.favorites.filter(fav => fav.movieId !== movieId);
 
-    user.favorites = user.favorites.filter(fav => fav.movie_id !== movieId);
-
-    if (user.favorites.length === originalLength) {
+    if (user.favorites.length === originalLength)
       return res.status(404).json({ error: 'Película no encontrada en favoritos' });
-    }
 
     await user.save();
     res.json({ message: 'Película eliminada de favoritos', favorites: user.favorites });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error al eliminar la película' });
+    res.status(500).json({ error: 'Error al eliminar película de favoritos' });
   }
 });
 
